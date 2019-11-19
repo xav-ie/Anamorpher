@@ -1,4 +1,4 @@
-PImage img, newImg;       // The source image
+PImage img, newImg;       // The source image //<>// //<>// //<>// //<>// //<>// //<>// //<>// //<>// //<>// //<>// //<>//
 float offsetX, offsetY;
 
 PImage openButton, anamorpherLogo, settingsButton, saveButton, aboutButton, minimizeButton, exitButton, loadingImage;
@@ -25,7 +25,7 @@ void setup() {
   loadingImage = loadImage("logos/loading.svg.png");
   currentButton = 0;
   xScale = width/14; // I am basing the placing of the logos on a 14-column layout
-  anamorphImage("tree.jpeg"); // this is a default image
+  anamorphImage("samples/tree.jpeg"); // this is a default image
 }
 
 void anamorphImage(String filePath) {

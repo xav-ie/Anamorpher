@@ -14,7 +14,7 @@ import java.io.IOException;
 
 public class imageSketcher extends PApplet {
 
-PImage img, newImg;       // The source image
+PImage img, newImg;       // The source image //<>// //<>// //<>// //<>// //<>// //<>// //<>// //<>// //<>// //<>// //<>//
 float offsetX, offsetY;
 
 PImage openButton, anamorpherLogo, settingsButton, saveButton, aboutButton, minimizeButton, exitButton, loadingImage;
@@ -41,7 +41,7 @@ public void setup() {
   loadingImage = loadImage("logos/loading.svg.png");
   currentButton = 0;
   xScale = width/14; // I am basing the placing of the logos on a 14-column layout
-  anamorphImage("tree.jpeg"); // this is a default image
+  anamorphImage("samples/tree.jpeg"); // this is a default image
 }
 
 public void anamorphImage(String filePath) {
@@ -341,7 +341,6 @@ public PVector calcAtPoint(float i, float j) {
   float tz0 = -I.z / ref.z;
   return R(tz0);
 }
-
   public void settings() {  fullScreen(P3D); }
   static public void main(String[] passedArgs) {
     String[] appletArgs = new String[] { "imageSketcher" };
