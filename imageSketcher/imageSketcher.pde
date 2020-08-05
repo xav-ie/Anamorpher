@@ -1,4 +1,4 @@
-PImage img, newImg;       // The source image //<>// //<>// //<>// //<>// //<>// //<>// //<>// //<>// //<>// //<>// //<>//
+PImage img, newImg;        //<>//
 float offsetX, offsetY;
 
 PImage openButton, anamorpherLogo, settingsButton, saveButton, aboutButton, minimizeButton, exitButton, loadingImage;
@@ -14,7 +14,7 @@ float xScale;
 boolean loading = false;
 
 void setup() {
-  fullScreen(P3D); 
+  size(800, 400, P3D); 
   openButton = loadImage("logos/open.svg.png");
   anamorpherLogo = loadImage("logos/anamorpherLogo.svg.png");
   settingsButton = loadImage("logos/settings.svg.png");
@@ -25,13 +25,14 @@ void setup() {
   loadingImage = loadImage("logos/loading.svg.png");
   currentButton = 0;
   xScale = width/14; // I am basing the placing of the logos on a 14-column layout
-  anamorphImage("samples/tree.jpeg"); // this is a default image
+  //anamorphImage("samples/tree.jpeg"); // this is a default image
 }
 
 void anamorphImage(String filePath) {
   background(0);
   img  = loadImage(filePath); // Load the default image
-  V = new PVector(img.width*1.15, 0, img.height*2.55);
+  float smallestDimension = Math.min(img.width, img.height);
+  V = new PVector(smallestDimension, 0, smallestDimension);
   P = new PVector(0, -(img.width / 2), img.height); // "starting position"
   I = L(0); 
   ref = new PVector(0, 0, 0);
@@ -51,7 +52,7 @@ void anamorphImage(String filePath) {
   println("newImgDimensions: ("+newImg.width+", "+newImg.height+")");
   for (int i=0; i<newImg.width; i++) {
     for (int j=0; j<newImg.height; j++) {
-      newImg.pixels[(int)(i+j*newImg.width)] = color(0, 0, 0, 0); // make all pixels transparent
+      newImg.pixels[(int)(i+j*newImg.width)] = color(255, 0, 0, 0); // make all pixels transparent
     }
   }
   calculatePixels();
@@ -65,20 +66,10 @@ void draw() {
   background(30);
   //drawLines();
 
-  imageMode(CENTER);
-
-  if (newImg.height>height-xScale) {
-    float ratio = newImg.height/(height-xScale);
-    image(newImg, width/2, height/2+xScale/2, img.width/ratio, height-xScale);
-  } else if (newImg.width>width) {
-    float ratio = newImg.width/width;
-    image(newImg, width/2, height/2+xScale/2, width, img.height/ratio);
-  } else {
-    image(newImg, width/2, height/2+xScale/2);
-  }
 
   imageMode(CORNER);
   //image(openImg, 0,0,50,50);
+  noFill();
 
   noStroke();
   fill(100);
@@ -96,9 +87,26 @@ void draw() {
     rect(width/2-xScale*1.5, height/2, xScale*3, xScale);
     image(loadingImage, width/2-xScale*1.5, height/2, xScale*3, xScale);
   }
+
+
+  imageMode(CENTER);
+  if (newImg!=null) {
+    stroke(255);
+    ellipse(mouseX, mouseY, img.width, img.width);
+    if (newImg.height>height-xScale) {
+      float ratio = newImg.height/(height-xScale);
+      image(newImg, width/2, height/2+xScale/2, img.width/ratio, height-xScale);
+    } else if (newImg.width>width) {
+      float ratio = newImg.width/width;
+      image(newImg, width/2, height/2+xScale/2, width, img.height/ratio);
+    } else {
+      image(newImg, width/2, height/2+xScale/2);
+    }
+  }
 }
 
 void mouseMoved() {
+  println("mouseMoved event");
   if (mouseY<xScale) {
     if (mouseX<xScale) { // openButton
       currentButton = 1;
@@ -151,10 +159,49 @@ void highlightButtons() {
   }
 }
 
-void clickButton() {
+
+
+
+void imageSelected(File selection) {
+  println("Yo I am here!!!!");
+  if (selection == null) {
+    println("Window was closed or the user hit cancel.");
+  } else {
+    println("User selected " + selection.getAbsolutePath());
+
+    loading=true;
+    //anamorphImage(selection.getAbsolutePath());
+    //anamorphImage("samples/tree.jpeg");
+    loading=false;
+  }
+}
+
+void keyReleased() {
+  if (keyCode==10) {
+    mousePressed();
+  } else if (keyCode==9) {
+    currentButton= (currentButton+1)%6;
+    println(currentButton);
+  }
+}
+void mousePressed() {
+  println("mousePressed event");
+  selectInput("Select an image to process:", "imageSelected");
+  
+  //println("Hey, I got here!");
+  //clickButton();
+/*
   if (currentButton==1) {
+    println("ayyyy here rn");
     // open file
-    selectInput("Select an image to process:", "imageSelected");
+    try {
+      anamorphImage("samples/tree.jpeg");
+      //selectInput("Select an image to process:", "imageSelected");
+    } 
+    catch (Exception e) {
+      e.printStackTrace();
+      println("wowowowowo");
+    }
   } else if (currentButton==2) {
     // settings
     println("settings opened");
@@ -167,31 +214,7 @@ void clickButton() {
   } else if (currentButton==5) {
     // close
     exit();
-  }
-}
-
-
-void imageSelected(File selection) {
-  if (selection == null) {
-    println("Window was closed or the user hit cancel.");
-  } else {
-    println("User selected " + selection.getAbsolutePath());
-    loading=true;
-    anamorphImage(selection.getAbsolutePath());
-    loading=false;
-  }
-}
-
-void keyReleased() {
-  if (keyCode==10) {
-    clickButton();
-  } else if (keyCode==9) {
-    currentButton= (currentButton+1)%6;
-    println(currentButton);
-  }
-}
-void mousePressed() {
-  clickButton();
+  }*/
 }
 
 void fileSelected(File selection) {
@@ -204,7 +227,7 @@ void fileSelected(File selection) {
   }
 }
 
-
+boolean loggedDiff=false;
 
 void calculatePixels() {
   newImg.loadPixels();
@@ -215,14 +238,46 @@ void calculatePixels() {
       PVector res = calcAtPoint(x, y);
       int loc = x + y*img.width;  // Pixel array location
       color c = img.pixels[loc];  // Grab the color
+
       res.add(-2*res.x-minX, (newImg.height/2));
-      //int newLoc = (int)(res.x+res.y*newImg.width); DO NOT MAKE THE MISTAKE OF CASTING WHOEL THING TO INT, YOU WILL GET BAD RESULTS
-      int newLoc = (int)res.x + (int)res.y * newImg.width;
-      try { 
-        newImg.pixels[newLoc] = c;
+      if (x<10&&y==0) {
+        PVector nextPoint = calcAtPoint(x+1, y);
+        nextPoint.add(-2*nextPoint.x-minX, (newImg.height/2));
+        float dist = res.dist(nextPoint);
+        float scale = 1/dist;
+
+        println("Scale:"+ scale);
       }
+      if (res.x>0&&res.y>0&&res.x<newImg.width&&res.y<newImg.height) {
+        int newLoc = (int)res.x + (int)res.y * newImg.width;
+        if ( ((newImg.pixels[newLoc]>>24)&0XFF) == 0)
+        {
+          newImg.pixels[newLoc] = c;
+        }
+      }
+
+      //int newLoc = (int)(res.x+res.y*newImg.width); DO NOT MAKE THE MISTAKE OF CASTING WHOEL THING TO INT, YOU WILL GET BAD RESULTS
+      color red = color(255, 0, 0);
+      PVector res2 = calcAtPoint(x+0.5, y);
+      res2.add(-2*res2.x-minX, (newImg.height/2));
+      int newLoc2 = (int)res2.x + (int)res2.y * newImg.width;
+
+      PVector res3 = calcAtPoint(x-0.5, y);
+      res3.add(-2*res3.x-minX, (newImg.height/2));
+      int newLoc3 = (int)res3.x + (int)res3.y * newImg.width;
+
+
+      try {
+        newImg.pixels[newLoc2] = c;
+      } 
       catch (Throwable e) {
-        println("oops");
+        println("oops2");
+      }
+      try {
+        newImg.pixels[newLoc3] = c;
+      } 
+      catch (Throwable e) {
+        println("oops2");
       }
       //pushMatrix();
       //translate(res.x-offsetX, res.y+offsetY, 0); 
@@ -304,24 +359,55 @@ float findMaxX(int w, int h) {
 }
 
 PVector L(float t) {
+  // as t goes from 0 to 1, we trace out the line segment PV
   return PVector.add(P, PVector.mult(PVector.sub(V, P), t));
+  // P + (V-P)t
 }
 
 PVector R(float t) {
+  // I + ref*t
   return PVector.add(I, PVector.mult(ref, t));
 } 
 
 PVector calcAtPoint(float i, float j) {
-  P = new PVector(0, i-img.width/2, img.height-j);
-  float r=img.width/2;
+  // calculate pixel coordinates relative to actual coordinate grid
+  P = new PVector(0, i-img.width/2, img.height-j); // I am centering the image on the y-z plane 
+  // x^2+y^2 = r^2
+  // we are deciding to make the cylinder touch tangenetially
+  // to the image's right and left edges this produces:
+  float r=img.width/2; 
+  // now, sub in the x and y component parts
+  // of L(t) into x^2+y^2 = r^2
+  // (px+t(vx−px))^2+ (py+t(vy−py))^2 = r^2
+  // this can be put into polynomial form
+  // a*t^2 + b*t + c = r^2
   float a = sq(P.x) + sq(P.y) - 2 * P.x * V.x + sq(V.x) - 2 * P.y * V.y + sq(V.y);
   float b = -2 * sq(P.x) - 2 * sq(P.y) + 2 * P.x * V.x + 2 * P.y * V.y;
   float c = sq(P.x) + sq(P.y);
+  // t = (-b ± sqrt(sq(b)-4a(c-sq(r)))) / 2*a
+  // the way the lines have been set up, we know that
+  // we only want the positive solution for t
+  // this is ti = (-b + sqrt(sq(b)-4a(c-sq(r)))) / 2*a 
+  // a*ti^2 + b*ti + (c-r^2) = 0
+  // note (c-r^2) is our actual "c" in the quadratic formula,
   float ti = (-b + sqrt(sq(b) - 4 * a * (c - sq(r)))) / (2 * a);
+  // let I be the intersection of L(t) with the cylinder
   I = L(ti);
-  N = PVector.sub(I, new PVector(0, 0, I.z));
-  PVector dm = PVector.mult(N, PVector.dot(N, V) / N.magSq());
+  // the normal vector passes through I and <0,0,I.z>, so it can be represented as the difference
+  // of these two points
+  N = new PVector(I.x, I.y, 0);
+  // with V and N, we can calculate ref, which is the reflection vector
+  // downmove = dm = (proj V onto N)
+  PVector dm = PVector.sub(PVector.mult(N, PVector.dot(N, V) / N.magSq()), V);
+  // I believe this is where my math goes awry. I have a 
   ref = PVector.add(V, PVector.mult(dm, 2));
+  // with the reflection vector, we can now form the line
+  // that reflects off the cylinder with I as a starting point
+  // and ref as the multiplier
+  // R(t) = I + t*ref
+  // We want to find a t where the z component of R(t)=0
+  // because that is where R(t) intersects with our 'paper'
+  // I.z + t*ref.z =0
   float tz0 = -I.z / ref.z;
   return R(tz0);
 }
